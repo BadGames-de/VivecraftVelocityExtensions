@@ -54,13 +54,12 @@ public class VVE {
 			return;
 		}
 
-		if(event.getTarget() instanceof Player) {
-			Player player = (Player) event.getTarget();
-			player.sendPluginMessage(channel, event.getData());
-		} else if (event.getSource() instanceof Player) {
+		if(event.getTarget() instanceof Player playerTarget) {
+			playerTarget.sendPluginMessage(channel, event.getData());
+		} else if (event.getSource() instanceof Player playerSource) {
 			byte[] data = event.getData();
 
-			if(data.length > 0 && data[0] == 0) {
+			if(!vivePlayers.containsKey(playerSource.getUniqueId()) && data.length > 0 && data[0] == 0) {
 				ByteArrayInputStream byin = new ByteArrayInputStream(data);
 				DataInputStream da = new DataInputStream(byin);
 				InputStreamReader is = new InputStreamReader(da);
@@ -68,14 +67,14 @@ public class VVE {
 
 				try {
 					String version = br.readLine();
-					vivePlayers.put(((Player) event.getSource()).getUniqueId(), !version.contains("NONVR"));
+					vivePlayers.put(playerSource.getUniqueId(), !version.contains("NONVR"));
 					logger.info("Player is using vivecraft. VR? " + !version.contains("NONVR"));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 
-			((Player) event.getSource()).getCurrentServer()
+			playerSource.getCurrentServer()
 					.ifPresent((ServerConnection connection) -> connection.sendPluginMessage(channel, event.getData()));
 		}
 	}
